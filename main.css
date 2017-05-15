@@ -1,0 +1,8 @@
+#map {
+  height: 100%;
+  border: 5px solid green;
+}
+
+#results-pane {
+  border: 5px solid red;
+}

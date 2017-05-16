@@ -6,16 +6,18 @@ function fetchData() {
     let placesKey = 'AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ';
     let mapsKey = 'AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w';
     let corsProxy = 'http://galvanize-cors-proxy.herokuapp.com/';
-    let denver = '39.747704,-104.990607'
+    let location = '39.747704,-104.990607'
+    let radius = 500;
+    let type = 'establishment';
+    let keyword = 'brewery';
+    let name = 'brew';
 
-    let request = corsProxy +  'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + denver + '&radius=500&type=restaurant&keyword=brewery&key=' + placesKey;
+    let request = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&name=${name}&radius=${radius}&type=${type}&keyword=${keyword}&key=${placesKey}`
 
-    let $xhr = $.getJSON(request);
+    let places_$xhr = $.getJSON(request);
 
-    console.log($xhr);
-
-    $xhr.done(function(data) {
-      if ($xhr.status !== 200) {
+    places_$xhr.done(function(data) {
+      if (places_$xhr.status !== 200) {
         return;
       }
       console.log(data.results);
@@ -28,7 +30,7 @@ function fetchData() {
 
     });
 
-    $xhr.fail(function(err) {
+    places_$xhr.fail(function(err) {
       console.log(err);
     });
 
@@ -36,18 +38,24 @@ function fetchData() {
 
 }
 
+function initMap() {
+
+  var uluru = {
+    lat: 39.747704,
+    lng: -104.990607
+  };
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 12,
+    center: uluru
+  });
+  var marker = new google.maps.Marker({
+    position: uluru,
+    map: map
+  });
+  console.log(marker)
+}
+
 // This is an Init function which will fire when the page loads.
 (function init() {
   fetchData();
 })();
-
-
-// function myMap() {
-//   var mapCanvas = document.getElementById("map");
-//   var mapOptions = {
-//       center: new google.maps.LatLng(51.5, -0.2),
-//       zoom: 10
-//   };
-//   var map = new google.maps.Map(mapCanvas, mapOptions);
-// }
-// myMap();

@@ -1,9 +1,15 @@
 #map {
-  height: 400px;
-  width: 50%;
-  border: 5px solid green;
+  height: 600px;
+  /*width: 50%;*/
+  /*border: 5px solid green;*/
 }
 
 #results-pane {
-  border: 5px solid red;
+  height: 600px;
+  max-height: none;
+  /*border: 5px solid red;*/
+}
+
+.pre-scrollable {
+  height: 600px;
 }

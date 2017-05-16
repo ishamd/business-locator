@@ -1,18 +1,16 @@
-'https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w'
-
 let placesKey = 'AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ';
 let mapsKey = 'AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w';
 let corsProxy = 'http://galvanize-cors-proxy.herokuapp.com/';
 let results = [];
-let address = 'Denver';
+let address = 'Austin';
 let addressLat;
 let addressLng;
 let cityPosition = {};
 let coords = `${addressLat},${addressLng}`;
-let radius = 500;
+let radius = 5000;
 let type = 'establishment';
 let keyword = 'brewery';
-let name = 'brew';
+// let name = 'brew';
 
 // Store location input to global variable
 let $button = $('button');
@@ -30,19 +28,19 @@ $(".dropdown-menu li a").click(function() {
 
   if ($(this).text() === 'Breweries') {
     keyword = 'brewery';
-    name = 'brew';
+    // name = 'brewery';
     fetchData();
   };
 
   if ($(this).text() === 'Wineries') {
     keyword = 'winery';
-    name = 'wine';
+    // name = 'wine';
     fetchData();
   };
 
   if ($(this).text() === 'Distilleries') {
     keyword = 'distillery';
-    name = 'whiskey';
+    // name = 'distillery';
     fetchData();
   };
 
@@ -64,15 +62,12 @@ function fetchData() {
         return;
       }
 
-      console.log(obj.results[0].geometry.location);
       addressLat = obj.results[0].geometry.location.lat;
-      console.log(addressLat);
       addressLng = obj.results[0].geometry.location.lng;
-      console.log(addressLng);
       coords = `${addressLat},${addressLng}`;
 
       // make API request to google places
-      let nearbyRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords}&name=${name}&radius=${radius}&type=${type}&keyword=${keyword}&key=${placesKey}`
+      let nearbyRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords}&radius=${radius}&keyword=${keyword}&key=${placesKey}`
       console.log(nearbyRequest);
 
       let places_$xhr = $.getJSON(nearbyRequest);
@@ -82,15 +77,22 @@ function fetchData() {
           return;
         }
 
+        console.log(data.results);
+
         results = [];
         let $results_pane = $('#results-pane');
-        $results_pane.empty();
+        let $accordion = $('#accordion');
+        $accordion.empty();
 
         for (let i = 0; i < data.results.length; i++) {
           // let $results_pane = $('#results-pane');
+          let place_id = data.results[i]['place_id'];
+          let id = data.results[i]['id'];
           let name = data.results[i]['name'];
           let position = data.results[i]['geometry']['location'];
           let result = {
+            'place_id': place_id,
+            'id': id,
             'name': name,
             'position': {
               lat: position.lat,
@@ -98,7 +100,9 @@ function fetchData() {
             }
           }
           results.push(result)
-          $results_pane.append(`<p>${name}</p>`);
+          console.log(results);
+          // $results_pane.append(`<p>${name}</p>`);
+          $accordion.append(createAccordion(name, id, i));
         }
 
         // append empty google map to page
@@ -121,6 +125,27 @@ function fetchData() {
   });
 
 };
+
+function createAccordion(name, info, num) {
+  let $panel = $('<div>', {"class": "panel panel-default"});
+  let $panel_heading = $('<div>', {id: "heading"+num, "class": "panel-heading", "role": "tab"});
+  let $h4 = $('<h4>', {"class": "panel-title"});
+  let $anchor = $('<a>', {"role": "button", "data-toggle": "collapse", "data-parent": "#accordion", "href": "#collapse"+num, "aria-expanded": "false", "aria-controls": "collapse"+num});
+  $anchor.text(name);
+  let $panel_collapse = $('<div>', {id: "collapse"+num, "class": "panel-collapse collapse", "role": "tabpanel", "aria-labelledby": "heading"+num});
+  let $panel_body = $('<div>', {"class": "panel-body"});
+  $panel_body.text(info);
+
+  $h4.append($anchor);
+  $panel_heading.append($h4);
+  $panel.append($panel_heading);
+  $panel_collapse.append($panel_body);
+  $panel.append($panel_collapse);
+
+  return $panel;
+}
+
+
 
 // initialize the map and drop markers on the page
 function initMap() {

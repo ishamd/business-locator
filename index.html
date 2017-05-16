@@ -42,7 +42,7 @@
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li class="dropdown">
-            <a id='choice' href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Business Type <span class="caret"></span></a>
+            <a id='choice' href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Breweries <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="#">Breweries</a></li>
               <li><a href="#">Wineries</a></li>
@@ -52,7 +52,7 @@
         </ul>
         <form class="navbar-form navbar-left">
           <div class="form-group">
-            <input id="location-input" type="text" class="form-control" placeholder="City">
+            <input id="location-input" type="text" class="form-control" placeholder="Austin">
           </div>
           <button type="submit" class="btn btn-default">Search</button>
         </form>
@@ -65,8 +65,11 @@
   <main>
     <div class="container-fluid">
       <div class="row">
-        <div id='results-pane' class=col-sm-6></div>
-        <div id='map' class=col-sm-6>
+        <div id='results-pane' class="col-sm-6 pre-scrollable">
+          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          </div>
+        </div>
+        <div id='map' class="col-sm-6">
           <!-- <img src="http://placehold.it/350x150"> -->
         </div>
       </div>

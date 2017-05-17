@@ -68,7 +68,7 @@ function fetchData() {
 
       // make API request to google places
       let nearbyRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords}&radius=${radius}&keyword=${keyword}&key=${placesKey}`
-      console.log(nearbyRequest);
+      // console.log(nearbyRequest);
 
       let places_$xhr = $.getJSON(nearbyRequest);
 
@@ -77,38 +77,66 @@ function fetchData() {
           return;
         }
 
-        console.log(data.results);
+        // console.log(data.results);
 
         results = [];
-        let $results_pane = $('#results-pane');
+        // let $results_pane = $('#results-pane');
         let $accordion = $('#accordion');
         $accordion.empty();
 
         for (let i = 0; i < data.results.length; i++) {
-          // let $results_pane = $('#results-pane');
           let place_id = data.results[i]['place_id'];
-          let id = data.results[i]['id'];
-          let name = data.results[i]['name'];
-          let position = data.results[i]['geometry']['location'];
-          let result = {
-            'place_id': place_id,
-            'id': id,
-            'name': name,
-            'position': {
-              lat: position.lat,
-              lng: position.lng
+
+          let detailsRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ`
+
+          let details_$xhr = $.getJSON(detailsRequest);
+
+          details_$xhr.done(function(data) {
+            if (details_$xhr.status !== 200) {
+              return;
             }
-          }
-          results.push(result)
-          console.log(results);
-          // $results_pane.append(`<p>${name}</p>`);
-          $accordion.append(createAccordion(name, id, i));
+
+            let obj = data.result;
+            // console.log(obj);
+
+            let website = obj.website;
+            // console.log(website);
+            let rating = obj.rating;
+            // console.log(rating);
+
+            let phoneNumber = obj.formatted_phone_number;
+
+            let id = obj.id;
+            let name = obj.name;
+            let vicinity = obj.vicinity;
+            let position = obj.geometry.location;
+            let result = {
+              'place_id': place_id,
+              'id': id,
+              'name': name,
+              'vicinity': vicinity,
+              'position': {
+                lat: position.lat,
+                lng: position.lng
+              }
+            }
+            results.push(result)
+            $accordion.append(createAccordion(name, vicinity, website, phoneNumber, rating, i));
+          })
+
+
+          details_$xhr.fail(function(err) {
+            console.log(err);
+          });
+
         }
 
         // append empty google map to page
         let $body = $('body');
+        let $script_div = $('#script-div');
+        $script_div.empty();
         let script = '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w&callback=initMap"></script>'
-        $body.append(script);
+        $script_div.append(script);
 
       });
 
@@ -126,15 +154,47 @@ function fetchData() {
 
 };
 
-function createAccordion(name, info, num) {
-  let $panel = $('<div>', {"class": "panel panel-default"});
-  let $panel_heading = $('<div>', {id: "heading"+num, "class": "panel-heading", "role": "tab"});
-  let $h4 = $('<h4>', {"class": "panel-title"});
-  let $anchor = $('<a>', {"role": "button", "data-toggle": "collapse", "data-parent": "#accordion", "href": "#collapse"+num, "aria-expanded": "false", "aria-controls": "collapse"+num});
+
+// Creates new bootstrap elements for the results-pane
+function createAccordion(name, address, website, phoneNumber, rating, num) {
+  let $panel = $('<div>', {
+    "class": "panel panel-default"
+  });
+  let $panel_heading = $('<div>', {
+    id: "heading" + num,
+    "class": "panel-heading",
+    "role": "tab"
+  });
+  let $h4 = $('<h4>', {
+    "class": "panel-title"
+  });
+  let $anchor = $('<a>', {
+    "role": "button",
+    "data-toggle": "collapse",
+    "data-parent": "#accordion",
+    "href": "#collapse" + num,
+    "aria-expanded": "false",
+    "aria-controls": "collapse" + num
+  });
+  let $panel_collapse = $('<div>', {
+    id: "collapse" + num,
+    "class": "panel-collapse collapse",
+    "role": "tabpanel",
+    "aria-labelledby": "heading" + num
+  });
+  let $panel_body = $('<div>', {
+    "class": "panel-body"
+  });
+  let $rating = $('<p>Rating: '+rating+'</p>');
+  let $website = $('<a href=\"'+website+'\">Link to website</a>');
+  let $address = $('<p>'+address+'</p>');
+  let $phoneNumber = $('<p>'+phoneNumber+'</p>');
+
   $anchor.text(name);
-  let $panel_collapse = $('<div>', {id: "collapse"+num, "class": "panel-collapse collapse", "role": "tabpanel", "aria-labelledby": "heading"+num});
-  let $panel_body = $('<div>', {"class": "panel-body"});
-  $panel_body.text(info);
+  $panel_body.append($rating);
+  $panel_body.append($address);
+  $panel_body.append($phoneNumber);
+  $panel_body.append($website);
 
   $h4.append($anchor);
   $panel_heading.append($h4);
@@ -144,8 +204,6 @@ function createAccordion(name, info, num) {
 
   return $panel;
 }
-
-
 
 // initialize the map and drop markers on the page
 function initMap() {

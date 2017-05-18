@@ -1,16 +1,15 @@
-let placesKey = 'AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ';
-let mapsKey = 'AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w';
-let corsProxy = 'http://galvanize-cors-proxy.herokuapp.com/';
+const placesKey = 'AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ';
+const mapsKey = 'AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w';
+const corsProxy = 'http://galvanize-cors-proxy.herokuapp.com/';
+let map;
 let results = [];
-let address = 'Austin';
 let addressLat;
 let addressLng;
-let cityPosition = {};
 let coords = `${addressLat},${addressLng}`;
 let radius = 5000;
-let type = 'establishment';
+let address = 'Austin';
 let keyword = 'brewery';
-// let name = 'brew';
+
 
 // Store location input to global variable
 let $button = $('button');
@@ -28,20 +27,17 @@ $(".dropdown-menu li a").click(function() {
 
   if ($(this).text() === 'Breweries') {
     keyword = 'brewery';
-    // name = 'brewery';
-    fetchData();
+    // fetchData();
   };
 
   if ($(this).text() === 'Wineries') {
     keyword = 'winery';
-    // name = 'wine';
-    fetchData();
+    // fetchData();
   };
 
   if ($(this).text() === 'Distilleries') {
     keyword = 'distillery';
-    // name = 'distillery';
-    fetchData();
+    // fetchData();
   };
 
 });
@@ -52,23 +48,22 @@ function fetchData() {
   $(document).ready(function() {
     console.log('Doc is ready');
 
-    // make geocodeAPI request
-    let geoRequest = `${corsProxy}https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w`
+    // make geocodeAPI request to get address lat/lng
+    let geoRequest = `${corsProxy}https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsKey}`
 
     let geo_$xhr = $.getJSON(geoRequest);
 
-    geo_$xhr.done(function(obj) {
+    geo_$xhr.done(function(object) {
       if (geo_$xhr.status !== 200) {
         return;
       }
 
-      addressLat = obj.results[0].geometry.location.lat;
-      addressLng = obj.results[0].geometry.location.lng;
+      addressLat = object.results[0].geometry.location.lat;
+      addressLng = object.results[0].geometry.location.lng;
       coords = `${addressLat},${addressLng}`;
 
-      // make API request to google places
+      // make nearby search request to google places API
       let nearbyRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords}&radius=${radius}&keyword=${keyword}&key=${placesKey}`
-      // console.log(nearbyRequest);
 
       let places_$xhr = $.getJSON(nearbyRequest);
 
@@ -77,10 +72,8 @@ function fetchData() {
           return;
         }
 
-        // console.log(data.results);
-
         results = [];
-        // let $results_pane = $('#results-pane');
+
         let $accordion = $('#accordion');
         $accordion.empty();
 
@@ -97,15 +90,9 @@ function fetchData() {
             }
 
             let obj = data.result;
-            // console.log(obj);
-
             let website = obj.website;
-            // console.log(website);
             let rating = obj.rating;
-            // console.log(rating);
-
             let phoneNumber = obj.formatted_phone_number;
-
             let id = obj.id;
             let name = obj.name;
             let vicinity = obj.vicinity;
@@ -133,10 +120,10 @@ function fetchData() {
 
         // append empty google map to page
         let $body = $('body');
-        let $script_div = $('#script-div');
-        $script_div.empty();
-        let script = '<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w&callback=initMap"></script>'
-        $script_div.append(script);
+        let $api = $('#api');
+        $api.remove();
+        let script = '<script id="api" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w&callback=initMap"></script>'
+        $body.append(script);
 
       });
 
@@ -212,16 +199,15 @@ function initMap() {
     lat: addressLat,
     lng: addressLng
   };
-  var map = new google.maps.Map(document.getElementById('map'), {
+
+  map = new google.maps.Map(document.getElementById('map'), {
     zoom: 12,
     center: center
   });
-  // // original marker set from google docs:
-  // var marker = new google.maps.Marker({
-  //   position: uluru,
-  //   map: map
-  // });
+  newMarkers(results);
+}
 
+function newMarkers(results) {
   for (let j = 0; j < results.length; j++) {
     let marker = new google.maps.Marker({
       position: new google.maps.LatLng({

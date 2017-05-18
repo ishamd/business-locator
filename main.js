@@ -214,7 +214,17 @@ function newMarkers(results) {
         lat: results[j].position.lat,
         lng: results[j].position.lng
       }),
+      title: results[j].name
     });
+
+    let infowindow = new google.maps.InfoWindow({
+          content: results[j].name
+        });
+
+    marker.addListener('click', function() {
+        infowindow.open(map, marker);
+    });
+
     marker.setMap(map);
   }
 }

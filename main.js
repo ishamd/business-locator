@@ -12,10 +12,10 @@ let keyword = 'brewery';
 
 // Store location input to global variable
 const $button = $('button');
-const $location_input = $('#location-input');
+const $locationInput = $('#location-input');
 $button.click((event) => {
   event.preventDefault();
-  address = $location_input.val();
+  address = $locationInput.val();
   fetchData();
 });
 
@@ -81,12 +81,12 @@ function fetchData() {
 
           const details_$xhr = $.getJSON(detailsRequest);
 
-          details_$xhr.done((data) => {
+          details_$xhr.done((response) => {
             if (details_$xhr.status !== 200) {
               return;
             }
 
-            const obj = data.result;
+            const obj = response.result;
             const website = obj.website;
             const rating = obj.rating;
             const phoneNumber = obj.formatted_phone_number;
@@ -155,13 +155,13 @@ function createAccordion(name, address, website, phoneNumber, rating, num) {
     'aria-expanded': 'false',
     'aria-controls': `collapse${num}`,
   });
-  const $panel_collapse = $('<div>', {
+  const $panelCollapse = $('<div>', {
     id: `collapse${num}`,
     class: 'panel-collapse collapse',
     role: 'tabpanel',
     'aria-labelledby': `heading${num}`,
   });
-  const $panel_body = $('<div>', {
+  const $panelBody = $('<div>', {
     class: 'panel-body',
   });
   const $rating = $(`<p>Rating: ${rating}</p>`);
@@ -170,16 +170,16 @@ function createAccordion(name, address, website, phoneNumber, rating, num) {
   const $phoneNumber = $(`<p>${phoneNumber}</p>`);
 
   $anchor.text(name);
-  $panel_body.append($rating);
-  $panel_body.append($address);
-  $panel_body.append($phoneNumber);
-  $panel_body.append($website);
+  $panelBody.append($rating);
+  $panelBody.append($address);
+  $panelBody.append($phoneNumber);
+  $panelBody.append($website);
 
   $h4.append($anchor);
   $panel_heading.append($h4);
   $panel.append($panel_heading);
-  $panel_collapse.append($panel_body);
-  $panel.append($panel_collapse);
+  $panelCollapse.append($panelBody);
+  $panel.append($panelCollapse);
 
   return $panel;
 }
@@ -198,18 +198,18 @@ function initMap() {
   newMarkers(results);
 }
 
-function newMarkers(results) {
-  for (let j = 0; j < results.length; j++) {
+function newMarkers(arr) {
+  for (let j = 0; j < arr.length; j++) {
     const marker = new google.maps.Marker({
       position: new google.maps.LatLng({
-        lat: results[j].position.lat,
-        lng: results[j].position.lng,
+        lat: arr[j].position.lat,
+        lng: arr[j].position.lng,
       }),
-      title: results[j].name,
+      title: arr[j].name,
     });
 
     const infowindow = new google.maps.InfoWindow({
-      content: results[j].name,
+      content: arr[j].name,
     });
 
     marker.addListener('click', () => {

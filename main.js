@@ -173,7 +173,7 @@ function createAccordion(name, address, website, phoneNumber, rating, num) {
     "class": "panel-body"
   });
   let $rating = $('<p>Rating: '+rating+'</p>');
-  let $website = $('<a href=\"'+website+'\">Link to website</a>');
+  let $website = $('<a href=\"'+website+'\" target=\"_blank\">Link to website</a>');
   let $address = $('<p>'+address+'</p>');
   let $phoneNumber = $('<p>'+phoneNumber+'</p>');
 

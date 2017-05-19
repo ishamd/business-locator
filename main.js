@@ -106,6 +106,7 @@ function fetchData() {
             };
             results.push(result);
             $accordion.append(createAccordion(name, vicinity, website, phoneNumber, rating, i));
+            newMarkers(results);
           });
 
 
@@ -118,7 +119,7 @@ function fetchData() {
         const $body = $('body');
         const $api = $('#api');
         $api.remove();
-        const script = '<script id="api" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w&callback=initMap"></script>';
+        const script = '<script id="api" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w&callback=initMap"></script>';
         $body.append(script);
       });
 

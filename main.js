@@ -1,16 +1,16 @@
 const placesKey = 'AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ';
 const mapsKey = 'AIzaSyDoThcP6tdQR8VR3xcjnZbjzTomgZD3B2w';
 const corsProxy = 'http://galvanize-cors-proxy.herokuapp.com/';
+const radius = 5000;
 let map;
 let results = [];
 let addressLat;
 let addressLng;
 let coords = `${addressLat},${addressLng}`;
-const radius = 5000;
 let address = 'Austin';
 let keyword = 'brewery';
 
-// Store location input to global variable
+// Store address input to global variable and begin fetching data
 const $button = $('button');
 const $locationInput = $('#location-input');
 $button.click((event) => {
@@ -19,35 +19,30 @@ $button.click((event) => {
   fetchData();
 });
 
-// change dropdown-menu to display selection
+// Add event listeners to dropdown-menu
 $('.dropdown-menu li a').click(function () {
   $(this).parents('.dropdown').find('#choice').html(`${$(this).text()} <span class="caret"></span>`);
   $(this).parents('.dropdown').find('#choice').val($(this).data('value'));
 
   if ($(this).text() === 'Breweries') {
     keyword = 'brewery';
-    // fetchData();
   }
 
   if ($(this).text() === 'Wineries') {
     keyword = 'winery';
-    // fetchData();
   }
 
   if ($(this).text() === 'Distilleries') {
     keyword = 'distillery';
-    // fetchData();
   }
 });
 
 
 function fetchData() {
   $(document).ready(() => {
-    console.log('Doc is ready');
 
-    // make geocodeAPI request to get address lat/lng
+    // Make geocode request to Maps API to get address lat/lng
     const geoRequest = `${corsProxy}https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsKey}`;
-
     const geo_$xhr = $.getJSON(geoRequest);
 
     geo_$xhr.done((object) => {
@@ -59,9 +54,8 @@ function fetchData() {
       addressLng = object.results[0].geometry.location.lng;
       coords = `${addressLat},${addressLng}`;
 
-      // make nearby search request to google places API
+      // Make nearby search request to google places API
       const nearbyRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords}&radius=${radius}&keyword=${keyword}&key=${placesKey}`;
-
       const places_$xhr = $.getJSON(nearbyRequest);
 
       places_$xhr.done((data) => {
@@ -69,16 +63,17 @@ function fetchData() {
           return;
         }
 
+        // Empty results array and accordion
         results = [];
-
         const $accordion = $('#accordion');
         $accordion.empty();
 
+        // Loop through 20 nearby search results
         for (let i = 0; i < data.results.length; i++) {
           const place_id = data.results[i].place_id;
 
+          // Make additioanl details request to google places API
           const detailsRequest = `${corsProxy}https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=AIzaSyCpTvE8KrIFGMdXXPHmIDzMKIzZ3xav9JQ`;
-
           const details_$xhr = $.getJSON(detailsRequest);
 
           details_$xhr.done((response) => {
@@ -104,6 +99,8 @@ function fetchData() {
                 lng: position.lng,
               },
             };
+
+            // Push details to results, update the accordion, add markers to map
             results.push(result);
             $accordion.append(createAccordion(name, vicinity, website, phoneNumber, rating, i));
             newMarkers(results);
@@ -185,7 +182,7 @@ function createAccordion(name, address, website, phoneNumber, rating, num) {
   return $panel;
 }
 
-// initialize the map and drop markers on the page
+// Initialize the map and drop markers on the page
 function initMap() {
   const center = {
     lat: addressLat,
@@ -199,6 +196,7 @@ function initMap() {
   newMarkers(results);
 }
 
+// Add new markers to the map
 function newMarkers(arr) {
   for (let j = 0; j < arr.length; j++) {
     const marker = new google.maps.Marker({
@@ -221,7 +219,7 @@ function newMarkers(arr) {
   }
 }
 
-// This is an Init function which will fire when the page loads.
+// Init function which will fire when the page loads.
 (function init() {
   fetchData();
 }());
